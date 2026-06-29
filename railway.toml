@@ -9,15 +9,22 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.railway"
 
 [deploy]
-# LightRAG entrypoint already serves at 9621; $PORT injected by Railway
-startCommand = "python -m lightrag.api.lightrag_server --host 0.0.0.0 --port ${PORT:-9621}"
+# Railway NÃO expande ${PORT} em TOML strings com aspas duplas passadas
+# como exec form — só o faz quando rodado via shell. Em vez de mexer no
+# CMD do Dockerfile (fix rígida), usamos `sh -c` aqui pra Railway expandir.
+# IMPORTANTE: o shell precisa estar presente na imagem (busybox python:3.12-slim NÃO tem sh executável no PATH por padrão)
+#
+# FIX 2: usar o CMD padrão do Dockerfile (que tem --port 9621 hardcoded) e não passar startCommand.
+# Railway expõe a porta automaticamente via $PORT — o Dockerfile final do LightRAG já escuta em 9621,
+# então o proxy Railway manda :443 → 9621. startCommand vazio = usa CMD do Dockerfile.
+startCommand = ""
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 
 # Persistent volumes — keep RAG storage and inputs across deploys.
-# Without these, every redeploy loses indexed documents.
+# Volumes criados via `railway volume add` (ver /tmp/lightrag-env-prod-guide.md).
 [[mounts]]
 mountPath = "/app/data/rag_storage"
 name = "lightrag-storage"
