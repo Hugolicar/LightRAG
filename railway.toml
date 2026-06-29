@@ -1,0 +1,31 @@
+# Railway deploy config — Hugolicar/LightRAG (fork)
+# Compatible with Railway builder. Uses Dockerfile.railway instead of upstream
+# Dockerfile because upstream uses BuildKit --mount=type=cache syntax that
+# the Railway builder rejects (validated jun 2026).
+# Activates multimodal RAG-Anything-equivalent via MinerU at deploy time.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.railway"
+
+[deploy]
+# LightRAG entrypoint already serves at 9621; $PORT injected by Railway
+startCommand = "python -m lightrag.api.lightrag_server --host 0.0.0.0 --port ${PORT:-9621}"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Persistent volumes — keep RAG storage and inputs across deploys.
+# Without these, every redeploy loses indexed documents.
+[[mounts]]
+mountPath = "/app/data/rag_storage"
+name = "lightrag-storage"
+
+[[mounts]]
+mountPath = "/app/data/inputs"
+name = "lightrag-inputs"
+
+[[mounts]]
+mountPath = "/app/data/prompts"
+name = "lightrag-prompts"
