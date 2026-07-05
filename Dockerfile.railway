@@ -40,6 +40,7 @@ COPY uv.lock .
 RUN uv sync --frozen --no-dev --extra api --extra offline --no-install-project --no-editable
 
 COPY lightrag/ ./lightrag/
+COPY raganything/ ./raganything/
 COPY --from=frontend-builder /app/lightrag/api/webui ./lightrag/api/webui
 
 RUN uv sync --frozen --no-dev --extra api --extra offline --no-editable \
@@ -63,6 +64,7 @@ ENV UV_SYSTEM_PYTHON=1 \
 COPY --from=builder /root/.local /root/.local
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/lightrag ./lightrag
+COPY --from=builder /app/raganything ./raganything
 COPY pyproject.toml .
 COPY setup.py .
 COPY uv.lock .
@@ -70,7 +72,7 @@ COPY uv.lock .
 RUN uv sync --frozen --no-dev --extra api --extra offline --no-editable \
     && /app/.venv/bin/python -m ensurepip --upgrade
 
-RUN mkdir -p /app/data/rag_storage /app/data/inputs /app/data/prompts /app/data/tiktoken
+RUN mkdir -p /app/data/rag_storage/raganything_output /app/data/inputs /app/data/prompts /app/data/tiktoken
 COPY --from=builder /app/data/tiktoken /app/data/tiktoken
 
 ENV TIKTOKEN_CACHE_DIR=/app/data/tiktoken \
