@@ -101,6 +101,10 @@ api = [
     # Chunking strategies (process_options=R / V); lazy-imported by lightrag.chunker
     "langchain-text-splitters>=0.3,<2",
     "langchain-experimental>=0.3.2,<1",  # >=0.3.2: SemanticChunker gained min_chunk_size
+    # RAG-Anything vendored bridge dependencies (do not depend on PyPI raganything,
+    # because it can resolve LightRAG differently from this fork).
+    "tqdm>=4.65",
+    "huggingface-hub>=0.20",
 ]
 
 # Offline deployment dependencies (layered design for flexibility)
@@ -170,7 +174,7 @@ Repository = "https://github.com/HKUDS/LightRAG"
 "Bug Tracker" = "https://github.com/HKUDS/LightRAG/issues"
 
 [tool.setuptools.packages.find]
-include = ["lightrag*"]
+include = ["lightrag*", "raganything*"]
 exclude = ["data*", "tests*", "scripts*", "examples*", "dickens*", "reproduce*", "output_complete*", "rag_storage*", "inputs*"]
 
 [tool.setuptools]
